@@ -278,7 +278,7 @@ body {
 .submit-button {
     width: 100%;
     padding: 20px;
-    background: linear-gradient(135deg, #ff004c 0%, #000000 100%);
+    background: #ff004c;
     color: white;
     border: none;
     border-radius: 16px;
@@ -291,6 +291,7 @@ body {
 }
 
 .submit-button:hover {
+    background: #e60042;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(255, 0, 76, 0.3);
 }

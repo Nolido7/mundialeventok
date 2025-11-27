@@ -77,11 +77,18 @@ async function generatePixPayment(paymentData) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Erro ao gerar pagamento PIX');
+            const errorText = await response.text();
+            let errorData;
+            try {
+                errorData = JSON.parse(errorText);
+            } catch {
+                errorData = { message: errorText };
+            }
+            throw new Error(errorData.message || errorData.error || 'Erro ao gerar pagamento PIX');
         }
 
         const data = await response.json();
+        console.log('Resposta da API Pixup:', data);
         return data;
     } catch (error) {
         console.error('Erro ao gerar pagamento PIX:', error);

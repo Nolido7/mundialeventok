@@ -100,10 +100,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // Gera o pagamento PIX
             const pixResponse = await window.PixupAPI.generatePixPayment(paymentData);
             
-            // Verifica se temos o código PIX
-            if (pixResponse.qrcode || pixResponse.pix_code || pixResponse.qr_code) {
-                const pixCode = pixResponse.qrcode || pixResponse.pix_code || pixResponse.qr_code;
-                
+            console.log('Resposta completa da API:', pixResponse);
+            
+            // Verifica diferentes formatos de resposta da API
+            const pixCode = pixResponse.qrcode || 
+                           pixResponse.pix_code || 
+                           pixResponse.qr_code || 
+                           pixResponse.code || 
+                           pixResponse.pix || 
+                           pixResponse.data?.qrcode ||
+                           pixResponse.data?.pix_code ||
+                           pixResponse.data?.code;
+            
+            if (pixCode) {
                 // Atualiza a interface
                 pixCodeInput.value = pixCode;
                 
@@ -119,17 +128,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 pixArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 
                 // Inicia verificação de status
-                if (pixResponse.transaction_id || pixResponse.id) {
-                    const transactionId = pixResponse.transaction_id || pixResponse.id;
+                const transactionId = pixResponse.transaction_id || 
+                                     pixResponse.id || 
+                                     pixResponse.transactionId ||
+                                     pixResponse.data?.id ||
+                                     pixResponse.data?.transaction_id;
+                
+                if (transactionId) {
                     startPaymentStatusCheck(transactionId);
                 }
             } else {
-                throw new Error('Código PIX não retornado pela API');
+                console.error('Resposta da API não contém código PIX:', pixResponse);
+                throw new Error('Código PIX não retornado pela API. Resposta: ' + JSON.stringify(pixResponse));
             }
             
         } catch (error) {
             console.error('Erro ao processar pagamento:', error);
-            alert('Erro ao gerar código PIX. Por favor, tente novamente.\n\n' + error.message);
+            const errorMessage = error.message || 'Erro desconhecido ao gerar código PIX';
+            alert('Erro ao gerar código PIX. Por favor, tente novamente.\n\n' + errorMessage);
             submitBtn.disabled = false;
             submitBtn.textContent = 'PAGAR E RECEBER SAQUE!';
         }
