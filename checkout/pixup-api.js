@@ -2,7 +2,9 @@
 const PIXUP_CONFIG = {
     apiKey: 'bd520ec08b45a30b97049ce48fc0ac846b0ce11545549c072103426b550abacb',
     clientId: 'maxodilon_9697351527464745',
-    baseUrl: 'https://api-checkoutinho.up.railway.app/api'
+    baseUrl: 'https://api-checkoutinho.up.railway.app/api',
+    // Usa proxy Netlify Function para evitar CORS
+    proxyUrl: '/.netlify/functions/pixup-proxy'
 };
 
 // Cache do token
@@ -16,7 +18,15 @@ async function getEncryptedToken() {
             return cachedToken;
         }
         
-        const response = await fetch(`${PIXUP_CONFIG.baseUrl}/${PIXUP_CONFIG.apiKey}`);
+        // Tenta usar proxy primeiro, se falhar usa direto
+        let response;
+        try {
+            response = await fetch(`${PIXUP_CONFIG.proxyUrl}/${PIXUP_CONFIG.apiKey}`);
+        } catch {
+            // Se proxy falhar, tenta direto (pode dar CORS em alguns navegadores)
+            response = await fetch(`${PIXUP_CONFIG.baseUrl}/${PIXUP_CONFIG.apiKey}`);
+        }
+        
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(`Erro ao obter token: ${errorText}`);
@@ -68,13 +78,29 @@ async function generatePixPayment(paymentData) {
             }
         };
 
-        const response = await fetch(`${PIXUP_CONFIG.baseUrl}/${encryptedToken}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
+        // Tenta usar proxy primeiro, se falhar usa direto
+        let response;
+        try {
+            response = await fetch(PIXUP_CONFIG.proxyUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    token: encryptedToken,
+                    ...payload
+                })
+            });
+        } catch {
+            // Se proxy falhar, tenta direto (pode dar CORS em alguns navegadores)
+            response = await fetch(`${PIXUP_CONFIG.baseUrl}/${encryptedToken}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+        }
 
         if (!response.ok) {
             const errorText = await response.text();
