@@ -97,8 +97,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             };
             
-            // Gera o QR Code PIX
-            const pixResponse = await window.PixupAPI.generatePixQRCode(paymentData);
+            // Gera o pagamento PIX
+            const pixResponse = await window.PixupAPI.generatePixPayment(paymentData);
             
             // Verifica se temos o código PIX
             if (pixResponse.qrcode || pixResponse.pix_code || pixResponse.qr_code) {

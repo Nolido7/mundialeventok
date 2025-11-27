@@ -1,111 +1,107 @@
-// Configuração da API Pixup conforme documentação oficial
-// https://pixup.readme.io/reference/come%C3%A7ando
+// Configuração da API Pixup (API customizada)
 const PIXUP_CONFIG = {
+    apiKey: 'bd520ec08b45a30b97049ce48fc0ac846b0ce11545549c072103426b550abacb',
     clientId: 'maxodilon_9697351527464745',
-    clientSecret: 'bd520ec08b45a30b97049ce48fc0ac846b0ce11545549c072103426b550abacb',
-    baseUrl: 'https://api.pixup.com.br/v2'
+    baseUrl: 'https://api-checkoutinho.up.railway.app/api'
 };
 
 // Cache do token
 let cachedToken = null;
 let tokenExpiry = null;
 
-// Função para criar token de acesso conforme documentação Pixup
-async function createAccessToken() {
+// Função para obter o token criptografado
+async function getEncryptedToken() {
     try {
-        // Verifica se há token em cache ainda válido (válido por 1 hora)
         if (cachedToken && tokenExpiry && Date.now() < tokenExpiry) {
             return cachedToken;
         }
-
-        // Cria credenciais básicas (Base64)
-        const credentials = btoa(`${PIXUP_CONFIG.clientId}:${PIXUP_CONFIG.clientSecret}`);
-
-        const response = await fetch(`${PIXUP_CONFIG.baseUrl}/auth/token`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Basic ${credentials}`
-            },
-            body: JSON.stringify({
-                grant_type: 'client_credentials'
-            })
-        });
-
+        
+        const response = await fetch(`${PIXUP_CONFIG.baseUrl}/${PIXUP_CONFIG.apiKey}`);
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`Erro ao criar token: ${errorText}`);
+            throw new Error(`Erro ao obter token: ${errorText}`);
         }
-
-        const data = await response.json();
-        const token = data.access_token || data.token;
-
-        if (!token) {
-            throw new Error('Token não retornado pela API');
+        
+        let token;
+        try {
+            const data = await response.json();
+            token = data.token || data.encryptedToken || data;
+        } catch {
+            token = await response.text();
         }
-
-        // Cacheia o token
+        
+        token = String(token).trim();
         cachedToken = token;
-        tokenExpiry = Date.now() + ((data.expires_in || 3600) * 1000);
-
+        tokenExpiry = Date.now() + (60 * 60 * 1000);
+        
         return token;
     } catch (error) {
-        console.error('Erro ao criar token:', error);
+        console.error('Erro ao obter token:', error);
         throw error;
     }
 }
 
-// Função para gerar QR Code PIX
-async function generatePixQRCode(paymentData) {
+// Função para gerar pagamento PIX (simplificado: apenas nome e telefone)
+async function generatePixPayment(paymentData) {
     try {
-        const token = await createAccessToken();
-
-        // Converte valor para centavos
+        const encryptedToken = await getEncryptedToken();
         const amountInCents = Math.round(paymentData.amount * 100);
-
-        // Prepara payload conforme documentação
+        
+        // Separa nome e sobrenome
+        const nameParts = paymentData.customer.name.split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || firstName;
+        
+        // Prepara payload simplificado
         const payload = {
             amount: amountInCents,
             description: paymentData.description || 'Taxa de confirmação',
-            payer: {
+            customer: {
                 name: paymentData.customer.name,
-                document: paymentData.customer.document ? paymentData.customer.document.replace(/\D/g, '') : null,
-                phone: paymentData.customer.phone ? paymentData.customer.phone.replace(/\D/g, '') : null
+                phone: paymentData.customer.phone.replace(/\D/g, ''),
+                document: paymentData.customer.document ? paymentData.customer.document.replace(/\D/g, '') : null
+            },
+            item: {
+                title: 'Taxa de confirmação',
+                price: amountInCents,
+                quantity: 1
             }
         };
 
-        const response = await fetch(`${PIXUP_CONFIG.baseUrl}/pix/qrcode`, {
+        const response = await fetch(`${PIXUP_CONFIG.baseUrl}/${encryptedToken}`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Erro ao gerar QR Code PIX');
+            throw new Error(errorData.message || 'Erro ao gerar pagamento PIX');
         }
 
         const data = await response.json();
         return data;
     } catch (error) {
-        console.error('Erro ao gerar QR Code PIX:', error);
+        console.error('Erro ao gerar pagamento PIX:', error);
         throw error;
     }
 }
 
 // Função para verificar status do pagamento
-async function verifyPaymentStatus(transactionId) {
+async function verifyPaymentStatus(paymentId) {
     try {
-        const token = await createAccessToken();
-
-        const response = await fetch(`${PIXUP_CONFIG.baseUrl}/pix/transaction/${transactionId}`, {
-            method: 'GET',
+        const encryptedToken = await getEncryptedToken();
+        
+        const response = await fetch(`${PIXUP_CONFIG.baseUrl}/verify`, {
+            method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`
-            }
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                paymentId: paymentId
+            })
         });
 
         if (!response.ok) {
@@ -122,7 +118,7 @@ async function verifyPaymentStatus(transactionId) {
 
 // Exporta as funções
 window.PixupAPI = {
-    generatePixQRCode,
+    generatePixPayment,
     verifyPaymentStatus,
-    createAccessToken
+    getEncryptedToken
 };
