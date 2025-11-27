@@ -23,7 +23,7 @@ body {
 
 .checkout-container {
     display: flex;
-    max-width: 1200px;
+    max-width: 100%;
     width: 100%;
     background: white;
     border-radius: 0;
@@ -38,6 +38,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    max-width: 600px;
 }
 
 .tiktok-logo {
@@ -98,6 +99,8 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .form-section {
@@ -112,7 +115,12 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.section-title:not(:has(.icon-user)) {
+    font-size: 24px;
+    font-weight: 500;
 }
 
 .icon-user {
