@@ -18,18 +18,18 @@ async function getEncryptedToken() {
             return cachedToken;
         }
         
-        // Tenta usar proxy primeiro, se falhar usa direto
-        let response;
-        try {
-            response = await fetch(`${PIXUP_CONFIG.proxyUrl}/${PIXUP_CONFIG.apiKey}`);
-        } catch {
-            // Se proxy falhar, tenta direto (pode dar CORS em alguns navegadores)
-            response = await fetch(`${PIXUP_CONFIG.baseUrl}/${PIXUP_CONFIG.apiKey}`);
-        }
+        // Usa proxy para evitar CORS
+        const response = await fetch(`${PIXUP_CONFIG.proxyUrl}/${PIXUP_CONFIG.apiKey}`);
         
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`Erro ao obter token: ${errorText}`);
+            let errorData;
+            try {
+                errorData = JSON.parse(errorText);
+            } catch {
+                errorData = { message: errorText };
+            }
+            throw new Error(`Erro ao obter token: ${errorData.message || errorData.error || errorText}`);
         }
         
         let token;
@@ -78,29 +78,17 @@ async function generatePixPayment(paymentData) {
             }
         };
 
-        // Tenta usar proxy primeiro, se falhar usa direto
-        let response;
-        try {
-            response = await fetch(PIXUP_CONFIG.proxyUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    token: encryptedToken,
-                    ...payload
-                })
-            });
-        } catch {
-            // Se proxy falhar, tenta direto (pode dar CORS em alguns navegadores)
-            response = await fetch(`${PIXUP_CONFIG.baseUrl}/${encryptedToken}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-        }
+        // Usa proxy para evitar CORS
+        const response = await fetch(PIXUP_CONFIG.proxyUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                token: encryptedToken,
+                ...payload
+            })
+        });
 
         if (!response.ok) {
             const errorText = await response.text();
