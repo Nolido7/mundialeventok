@@ -98,4 +98,3 @@ Ou será usado o valor padrão de R$ 21,67.
 - O valor do PIX é gerado dinamicamente baseado no valor do checkout
 - Os parâmetros UTM são preservados durante o redirecionamento
 - O sistema funciona perfeitamente em Netlify, Vercel e hosts pagos
-
