@@ -52,10 +52,43 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Se for POST, é para gerar pagamento
+        // Se for POST, é para gerar pagamento ou verificar status
         if (event.httpMethod === 'POST') {
             const body = JSON.parse(event.body);
-            const { token, ...payload } = body;
+            const { token, action, ...payload } = body;
+            
+            // Se for verificação de status
+            if (action === 'verify') {
+                const verifyUrl = `${PIXUP_BASE_URL}/verify`;
+                const response = await fetch(verifyUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        paymentId: payload.paymentId
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    return {
+                        statusCode: response.status,
+                        headers,
+                        body: JSON.stringify({ 
+                            error: errorText,
+                            message: 'Erro ao verificar status do pagamento'
+                        })
+                    };
+                }
+
+                const data = await response.json();
+                return {
+                    statusCode: 200,
+                    headers,
+                    body: JSON.stringify(data)
+                };
+            }
             
             // Se não tiver token no body, tenta obter do path ou usa API_KEY
             let encryptedToken = token;

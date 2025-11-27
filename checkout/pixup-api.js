@@ -115,18 +115,28 @@ async function verifyPaymentStatus(paymentId) {
     try {
         const encryptedToken = await getEncryptedToken();
         
-        const response = await fetch(`${PIXUP_CONFIG.baseUrl}/verify`, {
+        // Usa proxy para evitar CORS
+        const response = await fetch(PIXUP_CONFIG.proxyUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
+                token: encryptedToken,
+                action: 'verify',
                 paymentId: paymentId
             })
         });
 
         if (!response.ok) {
-            throw new Error('Erro ao verificar status do pagamento');
+            const errorText = await response.text();
+            let errorData;
+            try {
+                errorData = JSON.parse(errorText);
+            } catch {
+                errorData = { message: errorText };
+            }
+            throw new Error(errorData.message || errorData.error || 'Erro ao verificar status do pagamento');
         }
 
         const data = await response.json();
