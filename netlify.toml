@@ -8,6 +8,13 @@
   node_bundler = "esbuild"
 
 # Redirecionamentos
+# Exclui functions do redirecionamento
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/"
   to = "/app/index.html"
