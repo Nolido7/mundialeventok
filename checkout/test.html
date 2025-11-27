@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Checkout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-link {
+            display: block;
+            padding: 20px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            border: 2px solid #ff004c;
+            transition: all 0.3s;
+        }
+        .test-link:hover {
+            background: #ff004c;
+            color: white;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Checkout</h1>
+    
+    <div class="info">
+        <strong>Informações:</strong><br>
+        - Valor padrão: R$ 21,67<br>
+        - Você pode testar com valores diferentes usando o parâmetro ?valor=XX.XX na URL
+    </div>
+    
+    <a href="index.html" class="test-link">
+        ✅ Teste com valor padrão (R$ 21,67)
+    </a>
+    
+    <a href="index.html?valor=50.00" class="test-link">
+        💰 Teste com valor R$ 50,00
+    </a>
+    
+    <a href="index.html?valor=100.00" class="test-link">
+        💵 Teste com valor R$ 100,00
+    </a>
+    
+    <a href="index.html?valor=21.67&utm_source=test&utm_medium=email&ttclid=test123" class="test-link">
+        📊 Teste com UTM parameters
+    </a>
+    
+    <div class="info" style="margin-top: 30px;">
+        <strong>Nota:</strong> Certifique-se de que a API Pixup está configurada corretamente em <code>pixup-api.js</code>
+    </div>
+</body>
+</html>
+

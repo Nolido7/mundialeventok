@@ -1,0 +1,45 @@
+# Arquivos HTTrack (ferramenta de download de sites)
+*.whtt
+hts-cache/
+hts-log.txt
+cookies.txt
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.temp
+*~
+
+# Cache
+.cache/
+
+# Arquivos de backup
+*.bak
+*.backup
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node modules (se houver)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Arquivos de ambiente
+.env
+.env.local
+
+# Arquivos de build (se necessário)
+dist/
+build/
+

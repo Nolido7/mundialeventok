@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Pagamento PIX</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="checkout-container">
+        <div class="checkout-header">
+            <h1>Finalizar Pagamento</h1>
+            <p class="subtitle">Taxa de Confirmação</p>
+        </div>
+
+        <div class="checkout-content">
+            <!-- Resumo do Pedido -->
+            <div class="order-summary">
+                <h2>Resumo do Pedido</h2>
+                <div class="summary-item">
+                    <span>Taxa de confirmação</span>
+                    <span class="price" id="order-total">R$ 21,67</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total</span>
+                    <span class="total-price" id="final-total">R$ 21,67</span>
+                </div>
+            </div>
+
+            <!-- Formulário de Dados -->
+            <form id="checkout-form" class="checkout-form">
+                <div class="form-section">
+                    <h3>Dados Pessoais</h3>
+                    <div class="form-group">
+                        <label for="fullName">Nome Completo *</label>
+                        <input type="text" id="fullName" name="fullName" required placeholder="Nome e sobrenome">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">E-mail *</label>
+                        <input type="email" id="email" name="email" required placeholder="seu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Telefone *</label>
+                        <input type="tel" id="phone" name="phone" required placeholder="(85) 9 9999-9999">
+                    </div>
+                    <div class="form-group">
+                        <label for="document">CPF *</label>
+                        <input type="text" id="document" name="document" required placeholder="000.000.000-00" maxlength="14">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Método de Pagamento</h3>
+                    <div class="payment-method">
+                        <div class="payment-option active" data-method="pix">
+                            <div class="payment-icon">💳</div>
+                            <div class="payment-info">
+                                <span class="payment-name">PIX</span>
+                                <span class="payment-desc">Aprovação imediata</span>
+                            </div>
+                            <input type="radio" name="paymentMethod" value="pix" checked>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-button" id="submit-btn">
+                    <span>GERAR PIX E FINALIZAR</span>
+                </button>
+
+                <p class="terms-text">
+                    Ao finalizar o pagamento você concorda com nossos 
+                    <a href="#" target="_blank">termos de uso</a> e 
+                    <a href="#" target="_blank">política de privacidade</a>.
+                </p>
+            </form>
+
+            <!-- Área do PIX (oculta inicialmente) -->
+            <div id="pix-area" class="pix-area" style="display: none;">
+                <div class="pix-header">
+                    <h2>Pagamento via PIX</h2>
+                    <p class="pix-instructions">Escaneie o QR Code ou copie o código PIX</p>
+                </div>
+
+                <div class="pix-content">
+                    <div class="pix-qr-code" id="pix-qr-container">
+                        <!-- QR Code será inserido aqui -->
+                    </div>
+
+                    <div class="pix-code-section">
+                        <label for="pix-code">Código PIX (Copiar e Colar)</label>
+                        <div class="pix-code-input-wrapper">
+                            <textarea id="pix-code" readonly></textarea>
+                            <button type="button" class="copy-button" id="copy-pix-btn">
+                                <span>Copiar</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pix-info">
+                        <div class="info-item">
+                            <span class="info-label">Valor:</span>
+                            <span class="info-value" id="pix-amount">R$ 21,67</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Status:</span>
+                            <span class="info-value" id="pix-status">Aguardando pagamento</span>
+                        </div>
+                    </div>
+
+                    <div class="pix-timer">
+                        <p>⏱️ Este código expira em <span id="timer">30:00</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="pixup-api.js"></script>
+    <script src="checkout.js"></script>
+</body>
+</html>
+

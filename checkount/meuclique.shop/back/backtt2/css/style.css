@@ -1,0 +1,100 @@
+*{
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    font-family: TikTokFont, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Roboto, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    background-color: white;
+}
+
+.header {
+    background-color: white;
+}
+
+.header img{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    mix-blend-mode: multiply;
+}
+#attention{
+    background-color: white;
+    text-align: center;
+    color: crimson;
+    font-family: TikTokFont, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Roboto, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    margin-top: 20px;
+
+}
+.content{
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-top: 30px;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 33px;
+    font-family: TikTokFont, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Roboto, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+.content p{
+    width: 95%;
+}
+.button {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px; 
+  }
+  
+  .button-confirm {
+    width: 95%;       
+    height: 44px;      
+    font-size: 16px; 
+    cursor: pointer;
+    text-align: center;
+    background-color: crimson;
+    color: white;
+    line-height: 2.4rem;
+    border: none;
+    font-size: 18px;
+    text-decoration: none;
+    border-radius: 10px;
+
+  }
+  
+.footer{
+    margin-top: 60px;
+    display: grid;
+    background-color: whitesmoke;
+    height: 100%;
+    bottom: 0;
+    font-family: TikTokFont, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif, Roboto, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    padding: 10px;
+    gap: 20px;
+}
+.footer h1{
+    color: crimson;
+}
+.footer summary{
+    font-size: 17.7px;
+    font-weight: 300;
+}
+.footer p{
+    background-color: whitesmoke;
+    color: #777777;
+    line-height: 19px;
+    text-align: center;
+    margin: 0;
+}
+#seguro {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    bottom: 0;
+}
+#seguro img {
+    width: 200px;
+}
