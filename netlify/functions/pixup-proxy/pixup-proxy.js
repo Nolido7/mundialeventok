@@ -21,12 +21,17 @@ exports.handler = async (event, context) => {
         const API_KEY = 'bd520ec08b45a30b97049ce48fc0ac846b0ce11545549c072103426b550abacb';
 
         // Parse do path
-        const path = event.path.replace('/.netlify/functions/pixup-proxy', '');
+        let path = event.path.replace('/.netlify/functions/pixup-proxy', '');
+        if (path.startsWith('/')) {
+            path = path.substring(1);
+        }
         
         // Se for GET, é para obter token
         if (event.httpMethod === 'GET') {
-            const tokenPath = path.replace('/', '') || API_KEY;
+            const tokenPath = path || API_KEY;
             const url = `${PIXUP_BASE_URL}/${tokenPath}`;
+            
+            console.log('GET token from:', url);
             
             const response = await fetch(url);
             const data = await response.text();
@@ -34,7 +39,8 @@ exports.handler = async (event, context) => {
             // Tenta parsear como JSON, se não conseguir, retorna como texto
             let result;
             try {
-                result = JSON.parse(data);
+                const parsed = JSON.parse(data);
+                result = parsed.token || parsed.encryptedToken || parsed || data.trim();
             } catch {
                 result = data.trim();
             }
@@ -51,16 +57,25 @@ exports.handler = async (event, context) => {
             const body = JSON.parse(event.body);
             const { token, ...payload } = body;
             
-            // Se não tiver token no body, tenta obter do path
+            // Se não tiver token no body, tenta obter do path ou usa API_KEY
             let encryptedToken = token;
             if (!encryptedToken) {
-                const tokenPath = path.replace('/', '') || API_KEY;
-                const tokenResponse = await fetch(`${PIXUP_BASE_URL}/${tokenPath}`);
-                encryptedToken = await tokenResponse.text();
-                encryptedToken = encryptedToken.trim();
+                const tokenPath = path || API_KEY;
+                const tokenUrl = `${PIXUP_BASE_URL}/${tokenPath}`;
+                console.log('Getting token from:', tokenUrl);
+                const tokenResponse = await fetch(tokenUrl);
+                const tokenData = await tokenResponse.text();
+                try {
+                    const parsed = JSON.parse(tokenData);
+                    encryptedToken = parsed.token || parsed.encryptedToken || parsed || tokenData.trim();
+                } catch {
+                    encryptedToken = tokenData.trim();
+                }
             }
             
             const url = `${PIXUP_BASE_URL}/${encryptedToken}`;
+            console.log('POST payment to:', url);
+            console.log('Payload:', JSON.stringify(payload));
             
             const response = await fetch(url, {
                 method: 'POST',
@@ -72,6 +87,7 @@ exports.handler = async (event, context) => {
 
             if (!response.ok) {
                 const errorText = await response.text();
+                console.error('API Error:', errorText);
                 return {
                     statusCode: response.status,
                     headers,
@@ -83,6 +99,7 @@ exports.handler = async (event, context) => {
             }
 
             const data = await response.json();
+            console.log('API Response:', data);
             
             return {
                 statusCode: 200,
